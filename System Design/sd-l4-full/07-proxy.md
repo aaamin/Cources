@@ -30,6 +30,26 @@ Products often combine balancing, proxying, and gateway features. Conceptually, 
 
 Useful edge functions include TLS termination, authentication, rate limiting, routing, request-size limits, and trace IDs. Authorization tied to business data often still belongs in the service that owns that data.
 
+## Service discovery — an important companion concept
+
+Once a system has many service instances, callers need a way to find healthy destinations. Hard-coding IP addresses does not work because instances are created, removed, rescheduled, or replaced.
+
+At interview depth, understand two broad models:
+
+```text
+Client-side discovery
+caller → registry/DNS → choose instance → service
+
+Server-side discovery
+caller → LB/proxy → registry/backend pool → service
+```
+
+A service registry or DNS-based mechanism tracks discoverable endpoints. Health checks remove dead instances. In many managed environments this is hidden behind a load balancer, service name, or orchestration platform.
+
+> **Important:** Service discovery answers **where is the service?** Load balancing answers **which healthy instance should receive this request?** The capabilities often work together.
+
+Do not make service discovery a separate box unless the prompt needs internal dynamic routing. For a simple monolith or a handful of fixed services, it may be invisible infrastructure detail.
+
 ## Worked example — public APIs for several services
 
 An API gateway accepts `/users`, `/orders`, and `/payments`, authenticates once, and routes to the owning service. Internal services can still use their own load balancing. The gateway centralizes external policy without becoming the system of record.
@@ -170,6 +190,8 @@ Remember the **responsibility**, not the box name. Edge layers handle routing an
 - [ ] authn vs authz at edge
 - [ ] rate limiting
 - [ ] BFF concept
+- [ ] service discovery
+- [ ] client-side vs server-side discovery
 
 ## Interview-ready synthesis
 

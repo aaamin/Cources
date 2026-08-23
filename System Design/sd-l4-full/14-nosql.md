@@ -34,6 +34,36 @@ Limited joins encourage duplicated, query-shaped data. This speeds reads but cre
 
 A large system may use SQL for orders, key-value for sessions, search for text, and object storage for media. Every new store adds operational burden and synchronization, so use it only when the capability is worth it.
 
+## Other storage families you should recognize
+
+NoSQL preparation should not stop at key-value/document/wide-column. At L4, you should also recognize when a specialized store is the natural fit.
+
+### Search / inverted-index store
+
+Search engines build structures such as inverted indexes that map terms to documents. They are useful for full-text search, filtering, ranking, and autocomplete-like retrieval. They are usually **derived indexes**, not the authoritative source of truth for payments or inventory.
+
+### Time-series store
+
+Time-series systems optimize timestamped measurements, retention, downsampling, and range queries such as:
+
+```text
+metric + dimensions + time range
+```
+
+They are natural for metrics, IoT telemetry, and monitoring data.
+
+### Graph database
+
+Graph databases model nodes and edges directly and can make relationship traversals natural: friends-of-friends, fraud networks, dependency graphs, or recommendation relationships.
+
+Do not choose a graph database merely because the domain contains relationships. If the important queries are simple keyed lookups or bounded joins, a relational or key-value model may be simpler.
+
+### Object storage
+
+Object storage is optimized for large durable blobs rather than relational queries. Keep queryable metadata in a database and large bytes in object storage. Lesson 25 covers this in depth.
+
+> **Important:** Specialized stores improve one access pattern while increasing operational complexity. Introduce them only when that access pattern is important enough to justify another system.
+
 ## Worked example — three workload choices
 
 Session lookup by token naturally fits key-value. Orders/payments with strong relational invariants naturally fit SQL. Huge telemetry queried by device/time may fit wide-column or time-series storage. The correct answer changes with access patterns and guarantees.
@@ -186,6 +216,10 @@ Choose the **data model that matches access patterns and guarantees**. NoSQL is 
 - [ ] consistency options
 - [ ] search as derived index
 - [ ] polyglot persistence cost
+- [ ] search/inverted-index stores
+- [ ] time-series stores
+- [ ] graph databases
+- [ ] object storage as specialized store
 
 ## Interview-ready synthesis
 

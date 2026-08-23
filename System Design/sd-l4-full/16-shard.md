@@ -34,6 +34,52 @@ Balanced data size does not imply balanced traffic. Celebrity accounts, giant te
 
 Growth may require splitting/moving partitions while serving traffic. Queries that do not contain the shard key can fan to many shards and merge results, creating expensive scatter-gather.
 
+## Distributed ID generation
+
+Large distributed systems often need IDs that are unique without sending every creation through one central database sequence.
+
+### Database sequence / auto-increment
+
+Simple and ordered, and often the best choice while one database owns the write path. At very high distributed write scale, a single allocator can become a coordination point.
+
+### UUID
+
+UUIDs can be generated independently and provide a huge uniqueness space. Random UUIDs are easy to distribute but are larger than integers and can create poor locality in some ordered indexes.
+
+### Range allocation
+
+A central allocator can give each server a block of IDs:
+
+```text
+server A: 1,000,000–1,999,999
+server B: 2,000,000–2,999,999
+```
+
+This dramatically reduces coordination frequency while keeping numeric IDs.
+
+### Snowflake-style IDs
+
+A common distributed pattern combines roughly:
+
+```text
+timestamp + machine/worker id + per-time-unit sequence
+```
+
+It generates locally unique, roughly time-ordered IDs without one database round trip per item. The design must handle worker-ID uniqueness, clock behavior, and sequence exhaustion during extreme bursts.
+
+### Choosing an ID strategy
+
+Ask whether you need:
+
+- global uniqueness;
+- sortability by creation time;
+- unpredictability;
+- compactness;
+- local generation;
+- resistance to clock problems.
+
+> **Important:** IDs are part of the data model and partitioning strategy. Sequential IDs may create hot ordered indexes or reveal business volume; random IDs distribute well but sacrifice locality.
+
 ## Worked example — sharding chat messages
 
 Use `hash(conversation_id) → shard` to keep conversation history local and preserve per-conversation ordering. This works until one giant group dominates writes. At that point, split very large conversations into subpartitions while keeping a logical sequence strategy.
@@ -187,6 +233,10 @@ Shard-key test: **distribution + locality + hotspot risk + cross-shard cost + re
 - [ ] scatter-gather
 - [ ] logical shards
 - [ ] resharding
+- [ ] database sequences vs UUIDs
+- [ ] range allocation
+- [ ] Snowflake-style IDs
+- [ ] ID locality/unpredictability trade-offs
 
 ## Interview-ready synthesis
 

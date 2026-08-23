@@ -34,6 +34,34 @@ Failover must detect leader loss, elect/promote a replacement, and route clients
 
 Split brain is when multiple nodes believe they are leader and accept writes. Quorums, consensus, fencing, and careful failover mechanisms prevent it. L4 candidates need to understand the risk, not implement consensus.
 
+## Leader election, fencing, and multi-leader recognition
+
+### Leader election
+
+After a leader fails, replicas need a safe way to agree which node may accept authoritative writes. Real databases typically use a consensus/election mechanism internally.
+
+At L4, you do **not** need to implement Raft or Paxos, but you should understand the outcome required:
+
+```text
+old leader unavailable
+      ↓
+choose one new leader
+      ↓
+fence stale leader
+      ↓
+update routing
+```
+
+Fencing matters because a previously isolated leader may return and still believe it owns writes. A monotonically increasing term/epoch or equivalent mechanism lets storage reject stale authority.
+
+### Multi-leader replication
+
+Some systems allow writes in multiple locations and replicate between leaders. This can reduce regional write latency and improve availability, but concurrent updates can conflict.
+
+Use multi-leader only when the business data has a safe conflict strategy or when writes can be partitioned so the same record normally has one writer. For strict inventory/payment invariants, single-writer ownership is usually easier to reason about.
+
+> **Important:** “Fail over to a replica” is incomplete. Mention **detection, election/promotion, fencing, routing, and recovery of the old leader**.
+
 ## Worked example — profile update with replica lag
 
 The leader commits a new display name, but a follower has not replayed it. If the immediate GET goes to that follower, the old name appears. The product can route that user's immediate reads to the leader or accept bounded staleness for non-critical fields.
@@ -172,6 +200,9 @@ Replication questions: **where are copies, when is a write acknowledged, where d
 - [ ] failover timeline
 - [ ] split brain/fencing
 - [ ] failure domains
+- [ ] leader election at recognition depth
+- [ ] fencing/epochs
+- [ ] multi-leader trade-offs
 
 ## Interview-ready synthesis
 

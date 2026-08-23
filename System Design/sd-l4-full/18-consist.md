@@ -34,6 +34,21 @@ Multi-writer or eventually consistent systems can accept concurrent conflicting 
 
 A like count can tolerate seconds of staleness; user settings often want read-after-write; seat reservation needs strong correctness. State the guarantee for the operation, not the whole product.
 
+## Leaderless replication and repair — recognition depth
+
+Some replicated stores do not route every key through one leader. A coordinator can send reads/writes to several replicas and use versions/quorums to decide the result.
+
+This can improve availability and distribute write ownership, but it creates repair and conflict work.
+
+Common concepts worth recognizing:
+
+- **read repair:** a read notices stale replicas and updates them;
+- **anti-entropy:** background comparison/repair between replicas;
+- **hinted handoff:** temporarily store a write for an unavailable replica and deliver it later;
+- **version metadata:** determine which value is newer or whether writes are concurrent.
+
+You do not need to implement these mechanisms. The interview-level lesson is that quorum/leaderless designs exchange simple single-leader ordering for availability plus convergence machinery.
+
 ## Worked example — three feature guarantees
 
 Like count: eventual is acceptable. Profile settings: read-after-write is desirable. Seat reservation: two users must not both confirm one seat, so stronger coordination is required. This illustrates why consistency is a product decision.

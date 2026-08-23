@@ -34,6 +34,45 @@ Each insert/update/delete may update multiple indexes. Too many indexes slow wri
 
 Start with the actual query. For `WHERE conversation_id=? ORDER BY created_at DESC LIMIT 50`, a composite index beginning with `conversation_id` and then `created_at` naturally follows.
 
+## B-tree, LSM tree, and Bloom filter — recognition depth
+
+For L4, you do not need to implement a database storage engine, but knowing the basic trade is useful when an interviewer pushes below “SQL vs NoSQL.”
+
+### B-tree / B+tree intuition
+
+B-tree-family structures keep keys in sorted pages and support efficient point lookups and range scans. They are a natural fit for general-purpose database indexes where reads and ordered access matter.
+
+Conceptually:
+
+```text
+sorted tree pages
+     ↓
+point lookup + range scan
+```
+
+The cost is random page updates and maintaining the tree as writes arrive.
+
+### LSM-tree intuition
+
+Log-structured merge trees turn many writes into sequential appends and periodically merge sorted files in the background. This is attractive for write-heavy distributed stores.
+
+```text
+write → memory table → immutable sorted files → compaction
+```
+
+The trade-offs include compaction work, read amplification across multiple levels/files, and temporary extra disk usage.
+
+### Bloom filters
+
+A Bloom filter is a compact probabilistic structure that can say:
+
+- **definitely not present**, or
+- **maybe present**.
+
+It can avoid unnecessary disk reads when an LSM-based store has many sorted files. False positives are possible; false negatives are not, assuming correct construction.
+
+> **Interview depth:** Know the workload trade-off—B-tree-style indexing is strong for general reads/ranges; LSM-style storage favors sustained writes but pays compaction/read-amplification costs. Do not turn the interview into storage-engine implementation unless asked.
+
 ## Worked example — message history index
 
 A Message row has `message_id, conversation_id, sender_id, created_at, content`. The dominant read is “latest 50 messages in one conversation.” An index `(conversation_id, created_at)` directly serves that path. An index on `sender_id` does not.
@@ -180,6 +219,9 @@ If most rows match, scanning the index plus fetching many rows may cost as much 
 - [ ] read/write amplification
 - [ ] indexes for pagination
 - [ ] index trade-offs
+- [ ] B-tree/B+tree recognition
+- [ ] LSM-tree recognition
+- [ ] Bloom filter intuition
 
 ## Interview-ready synthesis
 

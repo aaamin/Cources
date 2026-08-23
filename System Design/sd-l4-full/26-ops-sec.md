@@ -42,6 +42,33 @@ PII needs retention, deletion, auditing, and access rules. Deleting one primary 
 
 Public systems face spam, scraping, abusive tenants, and credential attacks. Rate limits, quotas, validation, moderation, and tenant isolation reduce security and availability blast radius.
 
+## Tokens, OAuth/OIDC, RBAC, and ACLs — recognition depth
+
+Security questions in system design are usually about **trust boundaries and authorization**, not cryptographic implementation.
+
+### Session cookies vs bearer tokens
+
+A server-side session stores authentication state on the server and gives the client an opaque session identifier. A bearer token carries signed claims that services can validate without a central session lookup, though revocation becomes less immediate.
+
+JWT is one common token format. Do not treat “JWT” as an authentication architecture by itself; you still need issuance, expiration, key rotation, audience/scope validation, and revocation strategy for sensitive cases.
+
+### OAuth 2.0 and OpenID Connect
+
+At recognition depth:
+
+- **OAuth 2.0** is an authorization framework for delegated access;
+- **OpenID Connect (OIDC)** adds an identity/authentication layer on top.
+
+In interviews, saying “use OAuth” is not enough. State who the identity provider is, what token the client receives, and where authorization is enforced.
+
+### RBAC and ACLs
+
+**RBAC** grants permissions through roles such as admin/editor/viewer. **ACLs** attach permissions to a resource or object, such as a file shared with specific users.
+
+Large systems often combine them: organizational roles for broad permissions plus resource-level ACLs for individual objects.
+
+> **Important:** Verify identity at the edge if useful, but enforce resource authorization close to the service that owns the resource and understands its rules.
+
 ## Worked example — production checkout
 
 Define a checkout success/latency SLO. Monitor traffic, errors, p95/p99, dependency latency, queue lag, and reconciliation mismatches. Canary releases; authenticate at edge, authorize order access in the owning service, use TLS/encryption, protect secrets, and audit sensitive state transitions.

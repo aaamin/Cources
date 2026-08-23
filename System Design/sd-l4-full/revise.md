@@ -194,3 +194,18 @@ Before mocks: revisit weak categories, not every lesson.
 ## 46. Final Unseen FAANG-Style Mock
 
 **Revise:** final: scope control; invariants; checkout workflow; multi-region consistency; failover; overload; closing.
+
+
+## Extra L4 recognition topics added after audit
+
+- [ ] service discovery: client-side vs server-side
+- [ ] B-tree vs LSM-tree trade-off
+- [ ] Bloom filter: definitely-not / maybe-present
+- [ ] graph and time-series storage recognition
+- [ ] leader election + fencing at failover
+- [ ] multi-leader conflict trade-off
+- [ ] UUID / range allocation / Snowflake-style IDs
+- [ ] leaderless replication, read repair, hinted handoff
+- [ ] JWT/session-token trade-offs
+- [ ] OAuth 2.0 / OIDC recognition
+- [ ] RBAC vs resource ACL

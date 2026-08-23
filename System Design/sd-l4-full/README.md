@@ -71,3 +71,8 @@ Some topics are naturally broader than others, so lesson length varies. The impo
 ## Core principle
 
 > **Fundamentals first. Practice second. Repeated unseen performance determines readiness.**
+
+
+## Coverage audit
+
+See [`coverage.md`](coverage.md) for the final topic audit, scope boundary, and intentionally deferred advanced topics.
